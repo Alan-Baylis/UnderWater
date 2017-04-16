@@ -2,31 +2,25 @@
 
 public class SubControll : MonoBehaviour
 {
-    private float _motorControll;
-    private int _motorPower;
-    private float _playerlift;
-
     private Rigidbody2D _rigidbody2D;
+    private SpriteRenderer _spriteRenderer;
 
     private void OnEnable()
     {
         _rigidbody2D = GetComponent<Rigidbody2D>();
-        _motorPower = 1000;
+        _spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
     private void FixedUpdate()
     {
-        var lift = 800 + 800 * _playerlift;
-        Debug.Log("Lift:" +lift);
-        _rigidbody2D.AddForce(Vector2.up * lift);
-
-        _rigidbody2D.AddForce(Vector2.right * _motorControll * _motorPower);
-    }
-
-    private void Update()
-    {
-        _motorControll = Input.GetAxis("Horizontal");
-        _playerlift = Input.GetAxis("Vertical");
-        Debug.Log(_motorControll + "/" + _playerlift);
+        var velocity = _rigidbody2D.velocity;
+        if (velocity.x > 0)
+        {
+            _spriteRenderer.flipX = true;
+        }
+        else if(velocity.x < 0)
+        {
+            _spriteRenderer.flipX = false;
+        }
     }
 }
