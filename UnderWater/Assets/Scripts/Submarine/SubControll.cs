@@ -1,26 +1,41 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
+using UnityEngine.UI;
 
-public class SubControll : MonoBehaviour
+namespace Submarine
 {
-    private Rigidbody2D _rigidbody2D;
-    private SpriteRenderer _spriteRenderer;
-
-    private void OnEnable()
+    public class SubControll : MonoBehaviour
     {
-        _rigidbody2D = GetComponent<Rigidbody2D>();
-        _spriteRenderer = GetComponent<SpriteRenderer>();
-    }
+        private Rigidbody2D _rigidbody2D;
+        private SpriteRenderer _spriteRenderer;
 
-    private void FixedUpdate()
-    {
-        var velocity = _rigidbody2D.velocity;
-        if (velocity.x > 0)
+        public Text SpeedText;
+
+        private void OnEnable()
         {
-            _spriteRenderer.flipX = true;
+            _rigidbody2D = GetComponent<Rigidbody2D>();
+            _spriteRenderer = GetComponent<SpriteRenderer>();
         }
-        else if(velocity.x < 0)
+
+        private void FixedUpdate()
         {
-            _spriteRenderer.flipX = false;
+            AdjustSpriteDirection();
+
+            var velocity = _rigidbody2D.velocity;
+            SpeedText.text = string.Format("Speed: {0}m/s", Mathf.Round(velocity.magnitude * 100)/100f);
+        }
+
+        private void AdjustSpriteDirection()
+        {
+            var velocity = _rigidbody2D.velocity;
+            if (velocity.x > 0)
+            {
+                _spriteRenderer.flipX = true;
+            }
+            else if (velocity.x < 0)
+            {
+                _spriteRenderer.flipX = false;
+            }
         }
     }
 }
