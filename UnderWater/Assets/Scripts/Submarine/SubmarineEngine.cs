@@ -5,7 +5,7 @@ namespace Submarine
 {
     public class SubmarineEngine : MonoBehaviour
     {
-        private int _criticalHeat;
+        private int _criticalTemp;
         private float _motorControll;
         private float _playerlift;
         private Rigidbody2D _rigidbody2D;
@@ -18,7 +18,7 @@ namespace Submarine
         {
             _rigidbody2D = GetComponent<Rigidbody2D>();
             heat = 10;
-            _criticalHeat = 10000;
+            _criticalTemp = 200;
         }
 
         private void FixedUpdate()
@@ -28,7 +28,7 @@ namespace Submarine
 
 
             var baseFactor = 1;
-            if (heat > _criticalHeat)
+            if (IsHeatCritical())
                 baseFactor /= 2;
 
             var lift = baseFactor * 800 * _playerlift;
@@ -36,7 +36,7 @@ namespace Submarine
 
             var force = Vector2.right * motorInput + Vector2.up * lift;
 
-            heat += (int) force.magnitude / 25;
+            heat += (int) force.magnitude / 20;
             _rigidbody2D.AddForce(force + baseLift);
         }
 
@@ -44,13 +44,18 @@ namespace Submarine
         {
             var temp = GetTemperature();
             MotorHeatText.text = string.Format("Temp: {0}°C", temp);
-            if (heat > _criticalHeat)
+            if (IsHeatCritical())
                 MotorHeatText.color = Color.red;
             else
                 MotorHeatText.color = Color.black;
             var fastCooling = Mathf.Max((int) Mathf.Log10(heat), 0);
-            var cooling = 10 + fastCooling;
+            var cooling = 22 + 2*fastCooling;
             heat = Mathf.Max(0, heat - cooling);
+        }
+
+        private bool IsHeatCritical()
+        {
+            return GetTemperature() > _criticalTemp;
         }
 
         private int GetTemperature()
