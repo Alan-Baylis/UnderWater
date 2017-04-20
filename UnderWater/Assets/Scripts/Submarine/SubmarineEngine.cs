@@ -1,29 +1,28 @@
-﻿using UnityEngine;
+﻿using Controller;
+using Coolables;
+using UnityEngine;
 using UnityEngine.UI;
 
 namespace Submarine
 {
-    public class SubmarineEngine : MonoBehaviour
+    public class SubmarineEngine : CoolableComponent, IControllable
     {
-        private int _criticalTemp;
-        private float _motorControll;
-        private float _playerlift;
+        private Vector2 _motorControll;
         private Rigidbody2D _rigidbody2D;
 
-        private int heat;
         public Text MotorHeatText;
         public int MotorPower;
 
         private void OnEnable()
         {
             _rigidbody2D = GetComponent<Rigidbody2D>();
-            heat = 10;
-            _criticalTemp = 200;
+            Heat = 10;
+            ControllerManager.Target = gameObject;
         }
 
         private void FixedUpdate()
         {
-            Cooling();
+            Ui();
             var baseLift = 800 * Vector2.up;
 
 
@@ -31,44 +30,49 @@ namespace Submarine
             if (IsHeatCritical())
                 baseFactor /= 2;
 
-            var lift = baseFactor * 800 * _playerlift;
-            var motorInput = baseFactor * _motorControll * MotorPower;
+            var lift = baseFactor * 800 * _motorControll.y;
+            var motorInput = baseFactor * _motorControll.x * MotorPower;
 
             var force = Vector2.right * motorInput + Vector2.up * lift;
 
-            heat += (int) force.magnitude / 20;
+            Heat += (int) force.magnitude / 20;
             _rigidbody2D.AddForce(force + baseLift);
         }
 
-        private void Cooling()
+        private void Ui()
         {
+            if (MotorHeatText == null)
+            {
+                return;
+            }
+
             var temp = GetTemperature();
-            MotorHeatText.text = string.Format("Temp: {0}°C", temp);
+            MotorHeatText.text = string.Format("Engine: {0}°C", temp);
             if (IsHeatCritical())
                 MotorHeatText.color = Color.red;
             else
                 MotorHeatText.color = Color.black;
-            var fastCooling = Mathf.Max((int) Mathf.Log10(heat), 0);
-            var cooling = 22 + 2*fastCooling;
-            heat = Mathf.Max(0, heat - cooling);
         }
 
-        private bool IsHeatCritical()
+        protected override int TemperatureFactor
         {
-            return GetTemperature() > _criticalTemp;
+            get { return 100; }
         }
 
-        private int GetTemperature()
+        protected override int CriticalTemp
         {
-            var temp = 20 + heat / 100;
-            return temp;
+            get { return 200; }
         }
 
-        private void Update()
+        public override int GetMaxHeatTransfere()
         {
-            _motorControll = Input.GetAxis("Horizontal");
-            _playerlift = Input.GetAxis("Vertical");
-            Debug.Log(_motorControll + "/" + _playerlift);
+            var fastCooling = Mathf.Max((int)Mathf.Log10(Heat), 0);
+            return 22 + 2 * fastCooling;
+        }
+
+        public void UpdateAxis(Vector2 controllVector)
+        {
+            _motorControll = controllVector;
         }
     }
 }
