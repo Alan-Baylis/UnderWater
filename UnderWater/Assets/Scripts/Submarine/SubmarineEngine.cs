@@ -67,7 +67,7 @@ namespace Submarine
         public override int GetMaxHeatTransfere()
         {
             var fastCooling = Mathf.Max((int)Mathf.Log10(Heat), 0);
-            return 22 + 2 * fastCooling;
+            return 20 + 2 * fastCooling;
         }
 
         public void UpdateAxis(Vector2 controllVector)
