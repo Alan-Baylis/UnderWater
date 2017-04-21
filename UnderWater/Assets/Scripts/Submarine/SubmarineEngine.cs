@@ -11,7 +11,7 @@ namespace Submarine
         private Rigidbody2D _rigidbody2D;
 
         public Text MotorHeatText;
-        public int MotorPower;
+        public int EnginePower;
 
         private void OnEnable()
         {
@@ -23,19 +23,20 @@ namespace Submarine
         private void FixedUpdate()
         {
             Ui();
-            var baseLift = 800 * Vector2.up;
+            var weightLift = _rigidbody2D.mass * 0.8f;
+            var baseLift = weightLift * Vector2.up;
 
 
-            var baseFactor = 1;
+            var baseFactor = 1f;
             if (IsHeatCritical())
-                baseFactor /= 2;
+                baseFactor = baseFactor / 2.2f;
 
-            var lift = baseFactor * 800 * _motorControll.y;
-            var motorInput = baseFactor * _motorControll.x * MotorPower;
+            var lift = baseFactor * EnginePower * _motorControll.y;
+            var motorInput = baseFactor * _motorControll.x * EnginePower;
 
             var force = Vector2.right * motorInput + Vector2.up * lift;
 
-            Heat += (int) force.magnitude / 20;
+            Heat += (int) force.magnitude / 22;
             _rigidbody2D.AddForce(force + baseLift);
         }
 
@@ -67,7 +68,7 @@ namespace Submarine
         public override int GetMaxHeatTransfere()
         {
             var fastCooling = Mathf.Max((int)Mathf.Log10(Heat), 0);
-            return 20 + 2 * fastCooling;
+            return 18 + 2 * fastCooling;
         }
 
         public void UpdateAxis(Vector2 controllVector)
