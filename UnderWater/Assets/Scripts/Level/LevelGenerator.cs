@@ -1,6 +1,5 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 namespace Level
@@ -10,9 +9,9 @@ namespace Level
         private readonly int _chunkSize = 16;
         private Vector2 _shift;
         public float Factor = 0.5f;
-        public int Seed;
 
         public Material LandsMaterial;
+        public int Seed;
 
         private void Start()
         {
@@ -48,48 +47,36 @@ namespace Level
             var filter = newChunk.AddComponent<MeshFilter>();
             var collider = newChunk.AddComponent<PolygonCollider2D>();
 
-            var mesh = new Mesh();
-            mesh.name = "ChunkMesh";
-            
+            var mesh = new Mesh {name = "ChunkMesh"};
+
             var vertices = new List<Vector3>();
             var triangles = new List<int>();
             var uv = new List<Vector2>();
 
-            int counter = 0;
+            var counter = 0;
             for (var x = 0; x < chunk.Size; x++)
-            {
                 for (var y = 0; y < chunk.Size; y++)
                 {
-                    if (chunk.GetSolid(x, y))
+                    var block = chunk.GetBlock(x, y);
+                    if (block != null)
                     {
-
-                        var square = new[]
-                        {
-                            new Vector2(x, y),
-                            new Vector2(x, y + 1),
-                            new Vector2(x + 1, y + 1),
-                            new Vector2(x + 1, y)
-                        };
+                        var currentPosition = new Vector2(x, y);
+                        var rawShape = block.GetVertices();
+                        var square = rawShape.AddToAll(currentPosition);
 
                         collider.pathCount = counter + 1;
                         collider.SetPath(counter, square);
 
                         foreach (var vertex in square)
-                        {
                             vertices.Add(vertex);
-                        }
 
 
-                        var item = counter * 4;
-                        triangles.Add(item);
-                        triangles.Add(item + 1);
-                        triangles.Add(item + 2);
+                        var item = counter*4;
+                        var blockTris = block.GetTriangles();
+                        foreach (var index in blockTris)
+                            triangles.Add(item + index);
 
-                        triangles.Add(item + 2);
-                        triangles.Add(item + 3);
-                        triangles.Add(item);
-
-                        uv.Add(new Vector2(0,0));
+                        uv.Add(new Vector2(0, 0));
                         uv.Add(new Vector2(0, 1));
                         uv.Add(new Vector2(1, 1));
                         uv.Add(new Vector2(1, 0));
@@ -97,7 +84,6 @@ namespace Level
                         counter++;
                     }
                 }
-            }
 
             mesh.SetVertices(vertices);
             mesh.SetTriangles(triangles, 0);
@@ -116,7 +102,7 @@ namespace Level
                 {
                     var isSolid = IsSolid(dx + x, dy + y);
                     if (isSolid)
-                        chunk.SetSolid(x, y);
+                        chunk.SetBlock(x, y, new Block());
                 }
             return chunk;
         }
@@ -142,6 +128,5 @@ namespace Level
             var value2 = Mathf.PerlinNoise(yPos, x*f);
             return value2*value;
         }
-
     }
 }

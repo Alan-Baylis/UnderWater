@@ -1,16 +1,18 @@
-﻿using UnityEngine;
+﻿using JetBrains.Annotations;
+using UnityEngine;
 
 namespace Level
 {
     public class Chunk
     {
         private readonly bool[,] _solidMask;
-
+        private IBlock[,] _blocks;
         public Chunk(int size, int x, int y)
         {
             X = x;
             Y = y;
             Size = size;
+            _blocks = new IBlock[size,size];
             _solidMask = new bool[size, size];
         }
 
@@ -27,6 +29,17 @@ namespace Level
         {
             return _solidMask[x, y];
         }
+
+        public IBlock GetBlock(int x, int y)
+        {
+            return _blocks[x, y];
+        }
+
+        public void SetBlock(int x, int y, IBlock block)
+        {
+            _blocks[x, y] = block;
+        }
+
 
         public Vector2 GetWorldPosition()
         {
