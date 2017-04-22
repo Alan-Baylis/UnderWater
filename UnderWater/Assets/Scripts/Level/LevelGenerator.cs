@@ -9,7 +9,6 @@ namespace Level
     {
         private readonly int _chunkSize = 16;
         private Vector2 _shift;
-        public GameObject Block;
         public float Factor = 0.5f;
         public int Seed;
 
@@ -54,7 +53,8 @@ namespace Level
             
             var vertices = new List<Vector3>();
             var triangles = new List<int>();
-            
+            var uv = new List<Vector2>();
+
             int counter = 0;
             for (var x = 0; x < chunk.Size; x++)
             {
@@ -88,6 +88,12 @@ namespace Level
                         triangles.Add(item + 2);
                         triangles.Add(item + 3);
                         triangles.Add(item);
+
+                        uv.Add(new Vector2(0,0));
+                        uv.Add(new Vector2(0, 1));
+                        uv.Add(new Vector2(1, 1));
+                        uv.Add(new Vector2(1, 0));
+
                         counter++;
                     }
                 }
@@ -95,6 +101,7 @@ namespace Level
 
             mesh.SetVertices(vertices);
             mesh.SetTriangles(triangles, 0);
+            mesh.SetUVs(0, uv);
             filter.mesh = mesh;
         }
 
@@ -112,28 +119,6 @@ namespace Level
                         chunk.SetSolid(x, y);
                 }
             return chunk;
-        }
-
-        private void LegacyBuildFromChunkAt(Chunk chunk)
-        {
-            var dx = _chunkSize*chunk.X;
-            var dy = _chunkSize*chunk.Y;
-
-            for (var x = 0; x < chunk.Size; x++)
-                for (var y = 0; y < chunk.Size; y++)
-                {
-                    var targetX = dx + x;
-                    var targetY = dy + y;
-                    if (chunk.GetSolid(x, y))
-                        CreateBlock(targetX, targetY);
-                }
-        }
-
-        private void CreateBlock(int x, int y)
-        {
-            Instantiate(Block, transform);
-            var position = new Vector2(x, y);
-            Block.transform.position = position;
         }
 
         private bool IsSolid(int x, int y)
@@ -158,36 +143,5 @@ namespace Level
             return value2*value;
         }
 
-        private class Chunk
-        {
-            private readonly bool[,] _solidMask;
-
-            public Chunk(int size, int x, int y)
-            {
-                X = x;
-                Y = y;
-                Size = size;
-                _solidMask = new bool[size, size];
-            }
-
-            public int X { get; private set; }
-            public int Y { get; private set; }
-            public int Size { get; private set; }
-
-            public void SetSolid(int x, int y)
-            {
-                _solidMask[x, y] = true;
-            }
-
-            public bool GetSolid(int x, int y)
-            {
-                return _solidMask[x, y];
-            }
-
-            public Vector2 GetWorldPosition()
-            {
-                return new Vector2(X * Size, Y * Size);
-            }
-        }
     }
 }
