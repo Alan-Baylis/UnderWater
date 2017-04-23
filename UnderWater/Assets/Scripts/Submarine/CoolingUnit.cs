@@ -21,8 +21,13 @@ namespace Submarine
             {
                 maxHeat += TargetHeatTransfer(coolable);
             }
-            
-            var factor = (float) GetMaxHeatTransfere() / maxHeat;
+
+
+            var factor = 0f;
+            if (maxHeat > 0)
+            {
+                factor = (float) GetMaxHeatTransfere() / maxHeat;
+            }
             factor = Mathf.Min(factor, 1f);
 
             foreach (var coolable in coolables)

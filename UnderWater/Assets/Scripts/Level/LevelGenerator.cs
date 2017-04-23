@@ -17,21 +17,17 @@ namespace Level
         {
             var dx = ((((Seed + 3) << 5) - 4)*(((Seed - 2) >> 2) - 20)) << 1;
             _shift = new Vector2(dx, -dx);
-            var coroutine = BuildMapAsync();
-            StartCoroutine(coroutine);
+            BuildMapAsync();
         }
 
-        private IEnumerator BuildMapAsync()
+        private void BuildMapAsync()
         {
-            var mapSize = 5;
+            var mapSize = 2;
             for (var x = -mapSize; x < mapSize; x++)
                 for (var y = -mapSize; y < mapSize; y++)
                 {
                     var chunk = BuildChunkFor(x, y);
-                    //LegacyBuildFromChunkAt(chunk);
                     BuildFromChunk(chunk);
-                    Debug.Log(string.Format("chunk {0}/{1}", x, y));
-                    yield return null;
                 }
         }
 
